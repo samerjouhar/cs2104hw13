@@ -1,6 +1,5 @@
 import hashlib, binascii
 import time
-import os
 
 start = time.time()
 dict_array = []
@@ -34,18 +33,21 @@ hashed_pwd_hex_512 = hash512(password)
 print("\t256 SHA: ", hashed_pwd_hex_256)
 print("\t512 SHA: ", hashed_pwd_hex_512)
 
-print("Cracked SHA256: ", )
 
-
-print("Pwd is:" + password + " Length is: ", len(password))
+# print("Pwd is:" + password + " Length is: ", len(password))
 
 # print(dict_array)
 
 for word in dict_array:
     if hash256(word) == hashed_pwd_hex_256:
-        print("Guessed it! " + word)
-        print("Time to crack: ")
-    #else:
-        # print("Wrong:" + word)
+        print("Cracked SHA256: " + word)
+        print("Time to crack: ", time.time() - start)
+        break
+
+for word in dict_array:
+    if hash512(word) == hashed_pwd_hex_512:
+        print("Cracked SHA512: " + word)
+        print("Time to crack: ", time.time() - start)
+        break
 
 print("Elpased time: ", (time.time() - start), " seconds.")
