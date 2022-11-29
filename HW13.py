@@ -1,6 +1,7 @@
 import hashlib, binascii
 import time
 import asyncio
+import matplotlib, numpy
 
 def make_dictionary(file):
     dict_array = []
@@ -20,7 +21,9 @@ async def hash512(password):
     return binascii.hexlify(hashed_pwd)
 
 async def main():
-    dict_array = make_dictionary("common-passwords-win.txt")
+    #dict_array = make_dictionary("common-passwords-win.txt")
+    #dict_array = make_dictionary("best1050.txt")
+    dict_array = make_dictionary("common-full")
 
     hashes = await asyncio.gather(
         hash256(password),
@@ -37,20 +40,28 @@ async def main():
 
 async def crack_array(hashed_pwd_hex_256, hashed_pwd_hex_512, dict_array):
     start256 = time.time()
+    found256 = False
     for word in dict_array:
         hash256_word = await hash256(word)
         if hash256_word == hashed_pwd_hex_256:
             print("Cracked SHA256: " + word)
             print("Time to crack: ", time.time() - start256, "\n")
+            found256 = True
             break
+    if (not found256):
+        print("No SHA256 Passwords Cracked")
 
     start512 = time.time()
+    found512 = False
     for word in dict_array:
         hash512_word = await hash512(word)
         if hash512_word == hashed_pwd_hex_512:
             print("Cracked SHA512: " + word)
             print("Time to crack: ", time.time() - start512, "\n")
+            found512 = True
             break
+    if (not found512):
+        print("No SHA512 Passwords Cracked")
 
 start = time.time()
 
@@ -63,3 +74,4 @@ if __name__ == '__main__':
         else:
             print("Elpased time: ", (time.time() - start), " seconds.")
             break
+    
