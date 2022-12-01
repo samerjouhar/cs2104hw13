@@ -1,0 +1,8 @@
+In order to run our program the user must first execute it then it will prompt to enter a password.
+The program will then attempt to crack the password after it is hashed using SHA256 and SHA512 
+with the dictionary attack, keeping track of the time it takes for each. This will be displayed 
+to the user. The results are presented in a bar graph once the user quits the program by typing q in
+the input field. This bar graph shows all the the passwords difficulty vs. the number of guesses of
+the passwords that the user entered during the session. The x-axis is the passwords difficulty and 
+the y-axis being the number of guesses. Additionally, when the user exits the program the total time 
+of thier session will be displayed.
