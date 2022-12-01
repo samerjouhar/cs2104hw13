@@ -2,6 +2,7 @@ import hashlib, binascii
 import time
 import asyncio
 import matplotlib, numpy
+import matplotlib.pyplot as plt
 
 def make_dictionary(file):
     dict_array = []
@@ -72,6 +73,13 @@ if __name__ == '__main__':
             asyncio.run(main())
             password = input("Enter password: ")
         else:
+            names = ['group_a', 'group_b', 'group_c']
+            values = [1, 10, 100]
+
+            plt.bar(names, values)
+            plt.title('Password Difficulty vs. Number of Guesses\n' + r'Dictionary Size: 815')
+            plt.legend(bbox_to_anchor = (1.25, 0.6), loc='center right')
+            plt.show()
             print("Elpased time: ", (time.time() - start), " seconds.")
-            break
+            quit
     
