@@ -5,23 +5,15 @@ guesses = 0
 
 #when calling function, use idx = 0, curr = "", and layer = 1
 def checker256(layer):
-    for perm in permutations(dict, layer):
+    for perm in permutations(layer):
         guesses = guesses + 1
         if hash256(perm) == hashed_target:
             return [True, guesses]
     checker256(layer + 1)
+    if layer > len(dict):
+        return [False]
 
-#print(check256())
-#not finished yet
-count = 0
-def permute():
-    count = 0
-    for perm in permutations(dict, 2):
-        count = count + 1
-        print(perm)
-    print(count)
 
-permute()
 
 
 """
