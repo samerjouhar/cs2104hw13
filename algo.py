@@ -1,14 +1,18 @@
 #global vars
 from itertools import combinations, permutations
-dict = [1,2,3,4]
+dict = ['a','b','c','d']
 guesses = 0
 
 #when calling function, use layer = 1
 #returns if pass is cracked as bool, number of guesses as int, difficulty of password (layer) as int
+
 def checker256(layer):
     for perm in permutations(layer):
         guesses = guesses + 1
-        if hash256(perm) == hashed256_target:
+        temp = ''
+        for i in range(len(perm)):
+            temp = temp + perm[i]
+        if hash256(temp) == hashed256_target:
             return [True, guesses, layer]
     checker256(layer + 1)
     if layer > len(dict):
@@ -17,14 +21,29 @@ def checker256(layer):
 def checker512(layer):
     for perm in permutations(layer):
         guesses = guesses + 1
-        if hash512(perm) == hashed512_target:
+        temp = ''
+        for i in range(len(perm)):
+            temp = temp + perm[i]
+        if hash512(temp) == hashed512_target:
             return [True, guesses, layer]
-    checker512(layer + 1)
+    checker256(layer + 1)
     if layer > len(dict):
         return [False]
 
-
-
+"""
+def perm():
+    count = 0
+    temp = ''
+    for perms in permutations(dict, 3):
+        for i in range(len(perms)):
+            temp = temp + perms[i]
+            #print(perms[i])
+        print(temp)
+        temp = ''
+        count=count+1
+    print(count)
+perm()
+"""
 
 
 """
