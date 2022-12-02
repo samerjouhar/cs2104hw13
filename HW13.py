@@ -24,9 +24,9 @@ def hash512(password: str):
     return binascii.hexlify(hashed_pwd)
 
 def main():
-    #dict_array = make_dictionary("common-passwords-win.txt")
+    dict_array = make_dictionary("common-passwords-win.txt")
     #dict_array = make_dictionary("best1050.txt")
-    dict_array = make_dictionary("common-full")
+    #dict_array = make_dictionary("common-full")
 
     hash_256 = hash256(password)
     hash_512 = hash512(password)
@@ -52,9 +52,10 @@ def checker256(hashed_pwd_hex_256: bytes, hashed_pwd_hex_512: bytes, dict_array:
                 print("Cracked SHA256: ", temp)
                 print("Time to crack: ", time.time() - time256, "\n")
                 return [True, guesses, layer]
-        checker256(hashed_pwd_hex_256, hashed_pwd_hex_512, dict_array, layer + 1, len_password)
         if layer > len_password:
             return [False]
+        checker256(hashed_pwd_hex_256, hashed_pwd_hex_512, dict_array, layer + 1, len_password)
+        
 
 def checker512(hashed_pwd_hex_256: bytes, hashed_pwd_hex_512: bytes, dict_array: list[str], layer:int, len_password:int):
         time512 = time.time()
@@ -70,9 +71,9 @@ def checker512(hashed_pwd_hex_256: bytes, hashed_pwd_hex_512: bytes, dict_array:
                 print("Cracked SHA512: ", temp)
                 print("Time to crack: ", time.time() - time512, "\n")
                 return [True, guesses, layer]
-        checker512(hashed_pwd_hex_256, hashed_pwd_hex_512, dict_array, layer + 1, len_password)
         if layer > len_password:
             return [False]
+        checker512(hashed_pwd_hex_256, hashed_pwd_hex_512, dict_array, layer + 1, len_password)
 
 def crackers(hashed_pwd_hex_256: bytes, hashed_pwd_hex_512: bytes, dict_array, layer:int, len_password:int):
     procs = []
