@@ -44,28 +44,32 @@ async def main():
 async def crackers(hashed_pwd_hex_256: bytes, hashed_pwd_hex_512: bytes, dict_array: list[str], layer:int):
     time256 = time.time()
     async def checker256(layer):
-        guesses = 0
-        for perm in permutations(dict_array):
+        for perm in permutations(layer):
             guesses = guesses + 1
-            if await hash256(perm) == hashed_pwd_hex_256:
-                print("Cracked SHA256: ", perm)
+            temp = ''
+            for i in range(len(perm)):
+                temp = temp + perm[i]
+            if hash256(temp) == hashed_pwd_hex_256:
+                print("Cracked SHA256: ", temp)
                 print("Time to crack: ", time.time() - time256, "\n")
                 return [True, guesses, layer]
-    await checker256(layer + 1)
-    if layer > 4:
-        return [False]
+        await checker256(layer + 1)
+        if layer > len(dict_array):
+            return [False]
 
     time512 = time.time()
     async def checker512(layer):
-        guesses = 0
-        for perm in permutations(dict_array):
+        for perm in permutations(layer):
             guesses = guesses + 1
-            if await hash512(perm) == hashed_pwd_hex_512:
-                print("Cracked SHA256: ", perm)
+            temp = ''
+            for i in range(len(perm)):
+                temp = temp + perm[i]
+            if hash512(temp) == hashed_pwd_hex_512:
+                print("Cracked SHA256: ", temp)
                 print("Time to crack: ", time.time() - time512, "\n")
                 return [True, guesses, layer]
         await checker512(layer + 1)
-        if layer > 4:
+        if layer > len(dict_array):
             return [False]
 
     if (not await checker256(layer)):
