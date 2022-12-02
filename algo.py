@@ -1,19 +1,27 @@
 #global vars
-dict = []
-hashed_target = ""
+from itertools import combinations, permutations
+dict = [1,2,3,4]
 guesses = 0
 
-#when calling function, use idx = 0, curr = "", and layer = 0
-def checker256(idx, curr, layer):
-    guesses = guesses + 1
-    if hash256(curr + dict(idx)) == hashed_target:
-        return [True, guesses]
-    if idx == len(dict-1):
-        checker256(0, dict[layer], layer + 1)
-        *
+#when calling function, use idx = 0, curr = "", and layer = 1
+def checker256(layer):
+    for perm in permutations(dict, layer):
+        guesses = guesses + 1
+        if hash256(perm) == hashed_target:
+            return [True, guesses]
+    checker256(layer + 1)
 
-
+#print(check256())
 #not finished yet
+count = 0
+def permute():
+    count = 0
+    for perm in permutations(dict, 2):
+        count = count + 1
+        print(perm)
+    print(count)
+
+permute()
 
 
 """
