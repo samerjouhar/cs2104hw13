@@ -3,15 +3,26 @@ from itertools import combinations, permutations
 dict = [1,2,3,4]
 guesses = 0
 
-#when calling function, use idx = 0, curr = "", and layer = 1
+#when calling function, use layer = 1
+#returns if pass is cracked as bool, number of guesses as int, difficulty of password (layer) as int
 def checker256(layer):
     for perm in permutations(layer):
         guesses = guesses + 1
-        if hash256(perm) == hashed_target:
-            return [True, guesses]
+        if hash256(perm) == hashed256_target:
+            return [True, guesses, layer]
     checker256(layer + 1)
     if layer > len(dict):
         return [False]
+
+def checker512(layer):
+    for perm in permutations(layer):
+        guesses = guesses + 1
+        if hash512(perm) == hashed512_target:
+            return [True, guesses, layer]
+    checker512(layer + 1)
+    if layer > len(dict):
+        return [False]
+
 
 
 
