@@ -1,7 +1,9 @@
-import hashlib, binascii
-import time
 import asyncio
-import matplotlib, numpy, itertools
+import binascii
+import hashlib
+import time
+from itertools import permutations
+
 import matplotlib.pyplot as plt
 
 def make_dictionary(file):
@@ -25,7 +27,6 @@ async def main():
     #dict_array = make_dictionary("common-passwords-win.txt")
     #dict_array = make_dictionary("best1050.txt")
     dict_array = make_dictionary("common-full")
-    all_words = itertools.permutations(dict_array)
 
     hashes = await asyncio.gather(
         hash256(password),
@@ -36,47 +37,40 @@ async def main():
     print("\t512 SHA: ", hashes[1].decode("utf-8"), "\n")
 
     layer = 1
-    word = ""
     cracked_words = await asyncio.gather(
-        crack_array(hashes[0], hashes[1], all_words, layer, word)
+        crackers(hashes[0], hashes[1] ,dict_array, layer)
     )
 
+async def crackers(hashed_pwd_hex_256: bytes, hashed_pwd_hex_512: bytes, dict_array: list[str], layer:int):
+    time256 = time.time()
+    async def checker256(layer):
+        guesses = 0
+        for perm in permutations(dict_array):
+            guesses = guesses + 1
+            if await hash256(perm) == hashed_pwd_hex_256:
+                print("Cracked SHA256: ", perm)
+                print("Time to crack: ", time.time() - time256, "\n")
+                return [True, guesses, layer]
+    await checker256(layer + 1)
+    if layer > 4:
+        return [False]
 
-async def crack_array(hashed_pwd_hex_256: bytes, hashed_pwd_hex_512: bytes, all_words, layer: int, word: str):
-    start256 = time.time()
+    time512 = time.time()
+    async def checker512(layer):
+        guesses = 0
+        for perm in permutations(dict_array):
+            guesses = guesses + 1
+            if await hash512(perm) == hashed_pwd_hex_512:
+                print("Cracked SHA256: ", perm)
+                print("Time to crack: ", time.time() - time512, "\n")
+                return [True, guesses, layer]
+        await checker512(layer + 1)
+        if layer > 4:
+            return [False]
 
-    
-    
-    
-    await crack_array(hashed_pwd_hex_256, hashed_pwd_hex_512, all_words, layer + 1, word)
-
-
-
-
-
-    for index in range(len(dict_array)):
-        word += dict_array[index]
-        hash256_word = await hash256(dict_array[index + word_length])
-        if hash256_word == hashed_pwd_hex_256:
-            print("Cracked SHA256: " + dict_array[index])
-            print("Time to crack: ", time.time() - start256, "\n")
-            found256 = True
-            break
-
-    if (not found256):
-        await crack_array(hash256(word), hashed_pwd_hex_512, dict_array, word_length + 1)
+    if (not await checker256(layer)):
         print("No SHA256 Passwords Cracked")
-
-    start512 = time.time()
-    found512 = False
-    for word in dict_array:
-        hash512_word = await hash512(word)
-        if hash512_word == hashed_pwd_hex_512:
-            print("Cracked SHA512: " + word)
-            print("Time to crack: ", time.time() - start512, "\n")
-            found512 = True
-            break
-    if (not found512):
+    if (not await checker512(layer)):
         print("No SHA512 Passwords Cracked")
 
 start = time.time()
@@ -96,5 +90,5 @@ if __name__ == '__main__':
             plt.legend(bbox_to_anchor = (1.25, 0.6), loc='center right')
             plt.show()
             print("Elpased time: ", (time.time() - start), " seconds.")
-            quit
+            quit()
     
