@@ -2,6 +2,9 @@ import asyncio
 import binascii
 import hashlib
 import time
+import sys
+import concurrent.futures
+from multiprocessing import cpu_count
 from itertools import permutations
 
 import matplotlib.pyplot as plt
@@ -27,6 +30,7 @@ async def main():
     #dict_array = make_dictionary("common-passwords-win.txt")
     #dict_array = make_dictionary("best1050.txt")
     dict_array = make_dictionary("common-full")
+    NUM_CORES = cpu_count()
 
     hashes = await asyncio.gather(
         hash256(password),
@@ -37,44 +41,68 @@ async def main():
     print("\t512 SHA: ", hashes[1].decode("utf-8"), "\n")
 
     layer = 1
-    cracked_words = await asyncio.gather(
-        crackers(hashes[0], hashes[1] ,dict_array, layer)
-    )
+    futures = []
 
-async def crackers(hashed_pwd_hex_256: bytes, hashed_pwd_hex_512: bytes, dict_array: list[str], layer:int):
-    time256 = time.time()
-    async def checker256(layer):
-        for perm in permutations(layer):
+    with concurrent.futures.ProcessPoolExecutor(NUM_CORES) as executor:
+       
+            new_future = executor.submit(
+                crackers, # Function to perform
+                # v Arguments v
+                hashes[0],
+                hashes[1],
+                dict_array,
+                layer
+            )
+            futures.append(new_future)
+
+    concurrent.futures.wait(futures)
+
+    
+
+
+
+async def checker256(hashed_pwd_hex_256: bytes, hashed_pwd_hex_512: bytes, dict_array: list[str], layer:int):
+        time256 = time.time()
+        guesses = 0
+        for perm in permutations(dict_array, layer):
             guesses = guesses + 1
             temp = ''
             for i in range(len(perm)):
                 temp = temp + perm[i]
-            if hash256(temp) == hashed_pwd_hex_256:
+            if await hash256(temp) == hashed_pwd_hex_256:
                 print("Cracked SHA256: ", temp)
                 print("Time to crack: ", time.time() - time256, "\n")
                 return [True, guesses, layer]
-        await checker256(layer + 1)
+        await checker256(hashed_pwd_hex_256, hashed_pwd_hex_512, dict_array, layer + 1)
         if layer > len(dict_array):
             return [False]
 
-    time512 = time.time()
-    async def checker512(layer):
-        for perm in permutations(layer):
+async def checker512(hashed_pwd_hex_256: bytes, hashed_pwd_hex_512: bytes, dict_array: list[str], layer:int):
+        time512 = time.time()
+        guesses = 0
+        for perm in permutations(dict_array, layer):
             guesses = guesses + 1
             temp = ''
             for i in range(len(perm)):
                 temp = temp + perm[i]
-            if hash512(temp) == hashed_pwd_hex_512:
-                print("Cracked SHA256: ", temp)
+            if await hash512(temp) == hashed_pwd_hex_512:
+                print("Cracked SHA512: ", temp)
                 print("Time to crack: ", time.time() - time512, "\n")
                 return [True, guesses, layer]
-        await checker512(layer + 1)
+        await checker512(hashed_pwd_hex_256, hashed_pwd_hex_512, dict_array, layer + 1)
         if layer > len(dict_array):
             return [False]
 
-    if (not await checker256(layer)):
+def crackers(hashed_pwd_hex_256: bytes, hashed_pwd_hex_512: bytes, dict_array: list[str], layer:int):
+    if sys.version_info[0] == 3 and sys.version_info[1] >= 8 and sys.platform.startswith('win'):
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+    results256 = asyncio.run( checker256(hashed_pwd_hex_256, hashed_pwd_hex_512, dict_array, layer) )
+    results512 = asyncio.run( checker512(hashed_pwd_hex_256, hashed_pwd_hex_512, dict_array, layer) )
+
+    if (not results256):
         print("No SHA256 Passwords Cracked")
-    if (not await checker512(layer)):
+    if (not results512):
         print("No SHA512 Passwords Cracked")
 
 start = time.time()
@@ -86,6 +114,7 @@ if __name__ == '__main__':
             asyncio.run(main())
             password = input("Enter password: ")
         else:
+            print("Elpased time: ", (time.time() - start), " seconds.")
             names = ['group_a', 'group_b', 'group_c']
             values = [1, 10, 100]
 
@@ -93,6 +122,5 @@ if __name__ == '__main__':
             plt.title('Password Difficulty vs. Number of Guesses\n' + r'Dictionary Size: 815')
             plt.legend(bbox_to_anchor = (1.25, 0.6), loc='center right')
             plt.show()
-            print("Elpased time: ", (time.time() - start), " seconds.")
             quit()
     
