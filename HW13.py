@@ -118,7 +118,7 @@ if __name__ == '__main__':
             plt.xticks(range(len(passwords)), xticks)
             plt.xlabel("Entered Password (# of guesses)")
             plt.ylabel("Number of guesses taken")
-            plt.legend(bbox_to_anchor = (1.25, 0.6), loc='upper left', borderaxespad=0.)
+            plt.legend()
             plt.show()
             quit()
     
