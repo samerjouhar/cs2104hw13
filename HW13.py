@@ -4,9 +4,7 @@ import time
 from multiprocessing import Process
 from itertools import permutations
 import matplotlib.pyplot as plt
-import math
-
-import matplotlib.pyplot as plt
+import numpy as np
 
 passwords = []
 
@@ -64,7 +62,7 @@ def checker256(hashed_pwd_hex_256: bytes, dict_array: list[str], layer:int, len_
 
 def checker512(hashed_pwd_hex_512: bytes, dict_array: list[str], layer:int, len_password:int, timer:float):
         guesses = 0
-        for perm in  permutations(dict_array, layer):
+        for perm in permutations(dict_array, layer):
             guesses = guesses + 1
             temp = ''
             for i in range(len(perm)):
@@ -75,49 +73,52 @@ def checker512(hashed_pwd_hex_512: bytes, dict_array: list[str], layer:int, len_
                 print("Cracked SHA512: ", temp)
                 timetaken = time.time() - timer
                 print("Time to crack: ", timetaken, "\n")
-                return [True, guesses, layer, timetaken]
+                return [True, guesses, timetaken]
         if layer > len_password:
             return [False, -1]
-        checker512(hashed_pwd_hex_512, dict_array, layer + 1, len_password, timer)
+        if(checker512(hashed_pwd_hex_512, dict_array, layer + 1, len_password, timer)):
+            return [True, guesses, time.time() - timer]
 
 def crackers(hashed_pwd_hex_256: bytes, hashed_pwd_hex_512: bytes, dict_array, layer:int, len_password:int):
     time256 = time.time()
     data256 = checker256(hashed_pwd_hex_256, dict_array, layer, len_password, time256)
-    guesses_list.append(data256[1])
-    times_list.append(data256[2])
+    guesses256_list.append(data256[1])
+    times256_list.append(data256[2])
     time512 = time.time()
-    checker512(hashed_pwd_hex_512, dict_array, layer, len_password, time512)
+    data512 = checker512(hashed_pwd_hex_512, dict_array, layer, len_password, time512)
+    guesses512_list.append(data512[1])
+    times512_list.append(data512[2])
 
 start = time.time()
 
 if __name__ == '__main__':
     while (True):
         password = input("Enter password: ")
-        guesses_list = []
-        times_list = []
+        guesses256_list = []
+        guesses512_list = []
+        times256_list = []
+        times512_list = []
         while (password != 'q'):
             main()
             passwords.append(password)
             password = input("Enter password: ")
         else:
-            print(len(passwords))
-            print(len(times_list))
             xticks = []
             for i in range(len(passwords)):
-                xticks.append(passwords[i] + " (" + str(round(times_list[i],2)) + "s)")
+                xticks.append(passwords[i] + " (" + str(round(guesses256_list[i],2)) + ")")
                 print(xticks)
             print("Elpased time: ", (time.time() - start), " seconds.")
             #print(guesses_list)
             #print(times_list)
-            plt.bar(passwords, guesses_list)
-            plt.title('Passwords (SHA256) vs. Number of Guesses\n' + r'Dictionary Size: 104')
+            #plt.bar(passwords, guesses_list)
+            X_axis = np.arange(len(passwords))
+            plt.bar(X_axis - 0.2, times256_list, 0.4, label = "SHA256")
+            plt.bar(X_axis + 0.2, times512_list, 0.4, label = "SHA512")
+            plt.title('Passwords (SHA256) vs. Time Taken to Crack\n' + r'Dictionary Size: 104')
             plt.xticks(range(len(passwords)), xticks)
-            y = guesses_list
-            yint = range(min(y), math.ceil(max(y))+1)
-            plt.yticks(yint)
-            plt.xlabel("Entered passwords")
+            plt.xlabel("Entered Password (# of guesses)")
             plt.ylabel("Number of guesses taken")
-            plt.legend(bbox_to_anchor = (1.25, 0.6), loc='upper left', borderaxespad=0.)
+            plt.legend()
             plt.show()
             quit()
     
