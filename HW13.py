@@ -55,9 +55,14 @@ def checker256(hashed_pwd_hex_256: bytes, dict_array: list[str], layer:int, len_
                 return [True, guesses256, timetaken]
         if layer > len_password:
             return [False, -1]
+        tempdata = checker256(hashed_pwd_hex_256, dict_array, layer + 1, len_password, timer, guesses256)
+        if(tempdata):
+            return [True, tempdata[1], time.time() - timer]
+        """
         if(checker256(hashed_pwd_hex_256, dict_array, layer + 1, len_password, timer, guesses256)):
             guesses256 = checker256(hashed_pwd_hex_256, dict_array, layer + 1, len_password, timer, guesses256)[1]
             return [True, guesses256, time.time() - timer]
+        """
         
 
 def checker512(hashed_pwd_hex_512: bytes, dict_array: list[str], layer:int, len_password:int, timer:float, guesses512:int):
@@ -114,7 +119,7 @@ if __name__ == '__main__':
             plt.title('Passwords (SHA256 and SHA512) vs. Time Taken to Crack\n' + r'Dictionary Size: 104')
             plt.xticks(range(len(passwords)), xticks)
             plt.xlabel("Entered Password (# of guesses)")
-            plt.ylabel("Time Taken to Crack")
+            plt.ylabel("Time Taken to Crack (s)")
             plt.legend()
             plt.show()
             quit()
