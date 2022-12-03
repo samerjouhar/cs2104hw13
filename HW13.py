@@ -43,12 +43,12 @@ def main():
 def checker256(hashed_pwd_hex_256: bytes, dict_array: list[str], layer:int, len_password:int, timer:float):
         guesses = 0
         for perm in permutations(dict_array, layer):
-            if (len(perm) > len_password):
-                continue
             guesses = guesses + 1
             temp = ''
             for i in range(len(perm)):
                 temp = temp + perm[i]
+            if (len(temp) != len_password or len(temp) > len_password):
+                continue
             if hash256(temp) == hashed_pwd_hex_256:
                 print("Cracked SHA256: ", temp)
                 timetaken = time.time() - timer
@@ -63,12 +63,12 @@ def checker256(hashed_pwd_hex_256: bytes, dict_array: list[str], layer:int, len_
 def checker512(hashed_pwd_hex_512: bytes, dict_array: list[str], layer:int, len_password:int, timer:float):
         guesses = 0
         for perm in permutations(dict_array, layer):
-            if (len(perm) > len_password):
-                continue
             guesses = guesses + 1
             temp = ''
             for i in range(len(perm)):
                 temp = temp + perm[i]
+            if (len(temp) != len_password or len(temp) > len_password):
+                continue
             if hash512(temp) == hashed_pwd_hex_512:
                 print("Cracked SHA512: ", temp)
                 timetaken = time.time() - timer
