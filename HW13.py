@@ -58,11 +58,7 @@ def checker256(hashed_pwd_hex_256: bytes, dict_array: list[str], layer:int, len_
         tempdata = checker256(hashed_pwd_hex_256, dict_array, layer + 1, len_password, timer, guesses256)
         if(tempdata):
             return [True, tempdata[1], time.time() - timer]
-        """
-        if(checker256(hashed_pwd_hex_256, dict_array, layer + 1, len_password, timer, guesses256)):
-            guesses256 = checker256(hashed_pwd_hex_256, dict_array, layer + 1, len_password, timer, guesses256)[1]
-            return [True, guesses256, time.time() - timer]
-        """
+
         
 
 def checker512(hashed_pwd_hex_512: bytes, dict_array: list[str], layer:int, len_password:int, timer:float, guesses512:int):
