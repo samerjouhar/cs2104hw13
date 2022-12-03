@@ -6,6 +6,8 @@ from itertools import permutations
 
 import matplotlib.pyplot as plt
 
+passwords = []
+
 def make_dictionary(file) -> list[str]:
     dict_array = []
     dict_file = open(file, "r")
@@ -38,8 +40,7 @@ def main():
     layer = 1
     crackers( hash_256, hash_512, dict_array, layer, len_password)
 
-def checker256(hashed_pwd_hex_256: bytes, hashed_pwd_hex_512: bytes, dict_array: list[str], layer:int, len_password:int):
-        time256 = time.time()
+def checker256(hashed_pwd_hex_256: bytes, dict_array: list[str], layer:int, len_password:int, timer:float):
         guesses = 0
         for perm in permutations(dict_array, layer):
             if (len(perm) > len_password):
@@ -50,15 +51,15 @@ def checker256(hashed_pwd_hex_256: bytes, hashed_pwd_hex_512: bytes, dict_array:
                 temp = temp + perm[i]
             if hash256(temp) == hashed_pwd_hex_256:
                 print("Cracked SHA256: ", temp)
-                print("Time to crack: ", time.time() - time256, "\n")
+                print("Time to crack: ", time.time() - timer, "\n")
                 return [True, guesses, layer]
         if layer > len_password:
-            return [False]
-        checker256(hashed_pwd_hex_256, hashed_pwd_hex_512, dict_array, layer + 1, len_password)
+            return [False, -1]
+        if(checker256(hashed_pwd_hex_256, dict_array, layer + 1, len_password, timer)):
+            return [True, guesses, layer]
         
 
-def checker512(hashed_pwd_hex_256: bytes, hashed_pwd_hex_512: bytes, dict_array: list[str], layer:int, len_password:int):
-        time512 = time.time()
+def checker512(hashed_pwd_hex_512: bytes, dict_array: list[str], layer:int, len_password:int, timer:float):
         guesses = 0
         for perm in  permutations(dict_array, layer):
             if (len(perm) > len_password):
@@ -69,44 +70,33 @@ def checker512(hashed_pwd_hex_256: bytes, hashed_pwd_hex_512: bytes, dict_array:
                 temp = temp + perm[i]
             if hash512(temp) == hashed_pwd_hex_512:
                 print("Cracked SHA512: ", temp)
-                print("Time to crack: ", time.time() - time512, "\n")
+                print("Time to crack: ", time.time() - timer, "\n")
                 return [True, guesses, layer]
         if layer > len_password:
-            return [False]
-        checker512(hashed_pwd_hex_256, hashed_pwd_hex_512, dict_array, layer + 1, len_password)
+            return [False, -1]
+        checker512(hashed_pwd_hex_512, dict_array, layer + 1, len_password, timer)
 
 def crackers(hashed_pwd_hex_256: bytes, hashed_pwd_hex_512: bytes, dict_array, layer:int, len_password:int):
-    procs = []
-    proc256 = Process(target=checker256, args=(hashed_pwd_hex_256, hashed_pwd_hex_512, dict_array, layer, len_password))
-    proc512 = Process(target=checker512, args=(hashed_pwd_hex_256, hashed_pwd_hex_512, dict_array, layer, len_password))
-    procs.append(proc256)
-    procs.append(proc512)
-    proc256.start()
-    proc512.start()
-
-    for proc in procs:
-        proc.join()
-
-    if (not proc256):
-        print("No SHA256 Passwords Cracked")
-    if (not proc512):
-        print("No SHA512 Passwords Cracked")
+    time256 = time.time()
+    guesses_list.append(checker256(hashed_pwd_hex_256, dict_array, layer, len_password, time256)[1])
+    time512 = time.time()
+    checker512(hashed_pwd_hex_512, dict_array, layer, len_password, time512)
 
 start = time.time()
 
 if __name__ == '__main__':
     while (True):
         password = input("Enter password: ")
+        guesses_list = []
         while (password != 'q'):
             main()
+            passwords.append(password)
             password = input("Enter password: ")
         else:
             print("Elpased time: ", (time.time() - start), " seconds.")
-            names = ['group_a', 'group_b', 'group_c']
-            values = [1, 10, 100]
-
-            plt.bar(names, values)
-            plt.title('Password Difficulty vs. Number of Guesses\n' + r'Dictionary Size: 815')
+            print(guesses_list)
+            plt.bar(passwords, guesses_list)
+            plt.title('Password Difficulty vs. Number of Guesses\n' + r'Dictionary Size: 105')
             plt.legend(bbox_to_anchor = (1.25, 0.6), loc='center right')
             plt.show()
             quit()
