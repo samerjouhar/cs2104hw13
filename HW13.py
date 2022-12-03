@@ -4,6 +4,7 @@ import time
 from multiprocessing import Process
 from itertools import permutations
 import matplotlib.pyplot as plt
+import math
 
 import matplotlib.pyplot as plt
 
@@ -99,11 +100,23 @@ if __name__ == '__main__':
             passwords.append(password)
             password = input("Enter password: ")
         else:
+            print(len(passwords))
+            print(len(times_list))
+            xticks = []
+            for i in range(len(passwords)):
+                xticks.append(passwords[i] + " (" + str(round(times_list[i],2)) + "s)")
+                print(xticks)
             print("Elpased time: ", (time.time() - start), " seconds.")
             #print(guesses_list)
             #print(times_list)
             plt.bar(passwords, guesses_list)
-            plt.title('Password Difficulty vs. Number of Guesses\n' + r'Dictionary Size: 104')
+            plt.title('Passwords (SHA256) vs. Number of Guesses\n' + r'Dictionary Size: 104')
+            plt.xticks(range(len(passwords)), xticks)
+            y = guesses_list
+            yint = range(min(y), math.ceil(max(y))+1)
+            plt.yticks(yint)
+            plt.xlabel("Entered passwords")
+            plt.ylabel("Number of guesses taken")
             plt.legend(bbox_to_anchor = (1.25, 0.6), loc='upper left', borderaxespad=0.)
             plt.show()
             quit()
