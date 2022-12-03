@@ -52,7 +52,6 @@ def checker256(hashed_pwd_hex_256: bytes, dict_array: list[str], layer:int, len_
                 print("Cracked SHA256: ", temp)
                 timetaken = time.time() - timer
                 print("Time to crack: ", timetaken, "\n")
-                print(guesses256)
                 return [True, guesses256, timetaken]
         if layer > len_password:
             return [False, -1]
