@@ -38,12 +38,11 @@ def main():
     print("\t512 SHA: ", hash_512.decode("utf-8"), "\n")
 
     layer = 1
-    crackers( hash_256, hash_512, dict_array, layer, len_password)
+    crackers( hash_256, hash_512, dict_array, layer, len_password, 0)
 
-def checker256(hashed_pwd_hex_256: bytes, dict_array: list[str], layer:int, len_password:int, timer:float):
-        guesses = 0
+def checker256(hashed_pwd_hex_256: bytes, dict_array: list[str], layer:int, len_password:int, timer:float, guesses256:int):
         for perm in permutations(dict_array, layer):
-            guesses = guesses + 1
+            guesses256 = guesses256 + 1
             temp = ''
             for i in range(len(perm)):
                 temp = temp + perm[i]
@@ -53,17 +52,18 @@ def checker256(hashed_pwd_hex_256: bytes, dict_array: list[str], layer:int, len_
                 print("Cracked SHA256: ", temp)
                 timetaken = time.time() - timer
                 print("Time to crack: ", timetaken, "\n")
-                return [True, guesses, timetaken]
+                print(guesses256)
+                return [True, guesses256, timetaken]
         if layer > len_password:
             return [False, -1]
-        if(checker256(hashed_pwd_hex_256, dict_array, layer + 1, len_password, timer)):
-            return [True, guesses, time.time() - timer]
+        if(checker256(hashed_pwd_hex_256, dict_array, layer + 1, len_password, timer, guesses256)):
+            guesses256 = checker256(hashed_pwd_hex_256, dict_array, layer + 1, len_password, timer, guesses256)[1]
+            return [True, guesses256, time.time() - timer]
         
 
-def checker512(hashed_pwd_hex_512: bytes, dict_array: list[str], layer:int, len_password:int, timer:float):
-        guesses = 0
+def checker512(hashed_pwd_hex_512: bytes, dict_array: list[str], layer:int, len_password:int, timer:float, guesses512:int):
         for perm in permutations(dict_array, layer):
-            guesses = guesses + 1
+            guesses512 = guesses512 + 1
             temp = ''
             for i in range(len(perm)):
                 temp = temp + perm[i]
@@ -73,20 +73,19 @@ def checker512(hashed_pwd_hex_512: bytes, dict_array: list[str], layer:int, len_
                 print("Cracked SHA512: ", temp)
                 timetaken = time.time() - timer
                 print("Time to crack: ", timetaken, "\n")
-                return [True, guesses, timetaken]
+                return [True, guesses512, timetaken]
         if layer > len_password:
             return [False, -1]
-        if(checker512(hashed_pwd_hex_512, dict_array, layer + 1, len_password, timer)):
-            return [True, guesses, time.time() - timer]
+        if(checker512(hashed_pwd_hex_512, dict_array, layer + 1, len_password, timer, guesses512)):
+            return [True, guesses512, time.time() - timer]
 
-def crackers(hashed_pwd_hex_256: bytes, hashed_pwd_hex_512: bytes, dict_array, layer:int, len_password:int):
+def crackers(hashed_pwd_hex_256: bytes, hashed_pwd_hex_512: bytes, dict_array, layer:int, len_password:int, guesses:int):
     time256 = time.time()
-    data256 = checker256(hashed_pwd_hex_256, dict_array, layer, len_password, time256)
+    data256 = checker256(hashed_pwd_hex_256, dict_array, layer, len_password, time256, guesses)
     guesses256_list.append(data256[1])
     times256_list.append(data256[2])
     time512 = time.time()
-    data512 = checker512(hashed_pwd_hex_512, dict_array, layer, len_password, time512)
-    guesses512_list.append(data512[1])
+    data512 = checker512(hashed_pwd_hex_512, dict_array, layer, len_password, time512, guesses)
     times512_list.append(data512[2])
 
 start = time.time()
@@ -96,7 +95,6 @@ if __name__ == '__main__':
         password = input("Enter password: ")
         password = password.lower()
         guesses256_list = []
-        guesses512_list = []
         times256_list = []
         times512_list = []
         while (password != 'q'):
@@ -107,7 +105,6 @@ if __name__ == '__main__':
             xticks = []
             for i in range(len(passwords)):
                 xticks.append(passwords[i] + " (" + str(round(guesses256_list[i],2)) + ")")
-                print(xticks)
             print("Elpased time: ", (time.time() - start), " seconds.")
             #print(guesses_list)
             #print(times_list)
@@ -118,7 +115,7 @@ if __name__ == '__main__':
             plt.title('Passwords (SHA256 and SHA512) vs. Time Taken to Crack\n' + r'Dictionary Size: 104')
             plt.xticks(range(len(passwords)), xticks)
             plt.xlabel("Entered Password (# of guesses)")
-            plt.ylabel("Number of guesses taken")
+            plt.ylabel("Time Taken to Crack")
             plt.legend()
             plt.show()
             quit()
