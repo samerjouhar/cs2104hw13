@@ -117,7 +117,7 @@ if __name__ == '__main__':
             plt.title('Passwords (SHA256) vs. Time Taken to Crack\n' + r'Dictionary Size: 104')
             plt.xticks(range(len(passwords)), xticks)
             plt.xlabel("Entered Password (# of guesses)")
-            plt.ylabel("Number of guesses taken")
+            plt.ylabel("Time Taken to Crack")
             plt.legend()
             plt.show()
             quit()
