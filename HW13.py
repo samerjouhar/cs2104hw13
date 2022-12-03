@@ -93,6 +93,7 @@ start = time.time()
 if __name__ == '__main__':
     while (True):
         password = input("Enter password: ")
+        password = password.lower()
         guesses256_list = []
         times256_list = []
         times512_list = []
@@ -111,7 +112,7 @@ if __name__ == '__main__':
             X_axis = np.arange(len(passwords))
             plt.bar(X_axis - 0.2, times256_list, 0.4, label = "SHA256")
             plt.bar(X_axis + 0.2, times512_list, 0.4, label = "SHA512")
-            plt.title('Passwords (SHA256) vs. Time Taken to Crack\n' + r'Dictionary Size: 104')
+            plt.title('Passwords (SHA256 and SHA512) vs. Time Taken to Crack\n' + r'Dictionary Size: 104')
             plt.xticks(range(len(passwords)), xticks)
             plt.xlabel("Entered Password (# of guesses)")
             plt.ylabel("Time Taken to Crack (s)")
